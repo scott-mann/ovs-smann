@@ -91,10 +91,13 @@ extern struct list vlog_modules;
 
 /* Creates and initializes a global instance of a module named MODULE. */
 #define VLOG_DEFINE_MODULE(MODULE)                                      \
-        VLOG_DEFINE_MODULE__(MODULE)                                    \
-        OVS_CONSTRUCTOR(init_##MODULE) {                                \
-                list_insert(&vlog_modules, &VLM_##MODULE.list);         \
+    VLOG_DEFINE_MODULE__(MODULE)                                        \
+    OVS_CONSTRUCTOR(init_##MODULE) {                                    \
+        struct vlog_module *mp = vlog_module_from_name(#MODULE);        \
+        if (mp == NULL) {                                               \
+            list_insert(&vlog_modules, &VLM_##MODULE.list);             \
         }                                                               \
+    }                                                                   \
 
 const char *vlog_get_module_name(const struct vlog_module *);
 struct vlog_module *vlog_module_from_name(const char *name);
